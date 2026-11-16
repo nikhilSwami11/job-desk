@@ -19,8 +19,9 @@ class ApiTest(unittest.TestCase):
         cls._d = tempfile.TemporaryDirectory()
         root = Path(cls._d.name)
         cls.cfg = make_config(root)
+        (cls.cfg.static_dir / "assets").mkdir(parents=True)
         (cls.cfg.static_dir / "index.html").write_text("<meta content='__TOKEN__'>")
-        (cls.cfg.static_dir / "app.js").write_text("console.log(1)")
+        (cls.cfg.static_dir / "assets" / "index-abc123.js").write_text("console.log(1)")
         (cls.cfg.static_dir / "secret.txt").write_text("nope")
         cls.store = JobStore(cls.cfg.jobs_dir)
         cls.pipe = FakePipeline()
@@ -57,10 +58,16 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(h["Cache-Control"], "no-store")
         self.assertIn("script-src 'self'", h["Content-Security-Policy"])
 
-    def test_static_allowlist(self):
-        self.assertEqual(self.call("GET", "/static/app.js")[0], 200)
-        self.assertEqual(self.call("GET", "/static/secret.txt")[0], 404)
-        self.assertEqual(self.call("GET", "/static/%2e%2e%2fserver.py")[0], 404)
+    def test_built_assets_are_served_and_cached(self):
+        s, h, b = self.call("GET", "/assets/index-abc123.js")
+        self.assertEqual((s, b), (200, b"console.log(1)"))
+        self.assertIn("immutable", h["Cache-Control"])
+        self.assertEqual(self.call("GET", "/assets/missing.js")[0], 404)
+
+    def test_assets_cannot_escape_the_assets_folder(self):
+        self.assertEqual(self.call("GET", "/assets/%2e%2e%2fsecret.txt")[0], 404)
+        self.assertEqual(self.call("GET", "/assets/..%2findex.html")[0], 404)
+        self.assertEqual(self.call("GET", "/static/index.html")[0], 404)
 
     # ---- auth ----
     def test_jobs_require_token(self):
@@ -150,3 +157,20 @@ class ApiTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NotBuiltTest(unittest.TestCase):
+    def test_missing_frontend_gives_a_helpful_message(self):
+        with tempfile.TemporaryDirectory() as d:
+            cfg = make_config(Path(d))
+            server = make_server(App(cfg, JobStore(cfg.jobs_dir), FakePipeline(), TOKEN), 0)
+            threading.Thread(target=server.serve_forever, daemon=True).start()
+            try:
+                c = http.client.HTTPConnection("127.0.0.1", server.server_address[1], timeout=5)
+                c.request("GET", "/")
+                r = c.getresponse()
+                self.assertEqual(r.status, 503)
+                self.assertIn(b"npm run build", r.read())
+            finally:
+                server.shutdown()
+                server.server_close()

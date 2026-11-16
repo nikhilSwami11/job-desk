@@ -1,5 +1,6 @@
 """HTTP layer: routing, auth, static files. No business logic: it calls the store and the pipeline."""
 import json
+import re
 import secrets
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
@@ -9,7 +10,8 @@ from .prompts import MODES
 MIME = {".pdf": "application/pdf", ".txt": "text/plain; charset=utf-8", ".html": "text/html; charset=utf-8",
         ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".png": "image/png",
         ".json": "application/json", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8"}
-STATIC = {"app.css", "app.js", "logic.js", "views.js", "api.js"}
+ASSET_RE = re.compile(r"^[\w.-]+$")
+NOT_BUILT = "The frontend is not built yet. Run: cd app/web && npm install && npm run build"
 CSP = "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
 RUNNING = ("gating", "generating", "queued")
 MAX_BODY = 200_000
@@ -68,11 +70,16 @@ def make_handler(app: App):
             u = urlparse(self.path)
             parts = [p for p in u.path.split("/") if p]
             if u.path == "/":
-                html = (app.cfg.static_dir / "index.html").read_text().replace("__TOKEN__", app.token)
+                index = app.cfg.static_dir / "index.html"
+                if not index.is_file():
+                    return self._send(503, NOT_BUILT, "text/plain; charset=utf-8")
+                html = index.read_text().replace("__TOKEN__", app.token)
                 return self._send(200, html, MIME[".html"], {"Cache-Control": "no-store", "Content-Security-Policy": CSP})
-            if len(parts) == 2 and parts[0] == "static" and parts[1] in STATIC:
-                f = app.cfg.static_dir / parts[1]
-                return self._send(200, f.read_bytes(), MIME[f.suffix], {"Cache-Control": "no-cache"})
+            if len(parts) == 2 and parts[0] == "assets" and ASSET_RE.match(parts[1]):
+                f = app.cfg.static_dir / "assets" / parts[1]
+                if f.is_file():
+                    return self._send(200, f.read_bytes(), MIME.get(f.suffix, "application/octet-stream"), {"Cache-Control": "public, max-age=31536000, immutable"})
+                return self._send(404, {"error": "not found"})
             if u.path == "/api/jobs":
                 return self._send(200, app.store.list()) if self._authed() else self._deny()
             if len(parts) == 3 and parts[0] == "files":

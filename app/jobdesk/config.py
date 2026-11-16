@@ -20,7 +20,7 @@ class Config:
     @property
     def scratch_dir(self): return self.app_dir / "scratch"      # empty cwd: claude loads no project files
     @property
-    def static_dir(self): return self.app_dir / "static"
+    def static_dir(self): return self.app_dir / "web" / "dist"      # the built React app
     @property
     def usage_log(self): return self.app_dir / "usage.log"
     @property

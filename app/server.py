@@ -32,5 +32,7 @@ def build_app():
 
 if __name__ == "__main__":
     app = build_app()
+    if not (app.cfg.static_dir / "index.html").is_file():
+        print("NOTE: the frontend is not built yet. Run:  cd app/web && npm install && npm run build")
     print(f"Job Desk on http://127.0.0.1:{app.cfg.port}  (token in {app.cfg.token_file})")
     make_server(app, app.cfg.port).serve_forever()
