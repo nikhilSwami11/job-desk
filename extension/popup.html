@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Job Desk</title>
+<style>
+  :root { --bg:#ffffff; --ink:#16181d; --mute:#525866; --line:#dfe2e8; --soft:#f0f2f6; --blue:#1d4ed8; --blue-ink:#fff;
+          --ok:#166534; --ok-bg:#e3f5e8; --warn:#8a4b08; --warn-bg:#fdf0d8; --bad:#a32020; --bad-bg:#fbe4e4; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#1a1d23; --ink:#eceef2; --mute:#a3a9b6; --line:#2c313b; --soft:#232730;
+          --blue:#6d93ff; --blue-ink:#0b1020; --ok:#7ee2a0; --ok-bg:#163223; --warn:#f6c26b; --warn-bg:#382a10; --bad:#ff9a9a; --bad-bg:#3a1a1a; } }
+  * { box-sizing:border-box; } body { margin:0; width:380px; background:var(--bg); color:var(--ink); font:14px/1.45 -apple-system,system-ui,sans-serif; }
+  .wrap { padding:14px; } h1 { font-size:16px; margin:0 0 10px; display:flex; justify-content:space-between; align-items:center; }
+  h1 a { font-size:12px; font-weight:500; color:var(--blue); text-decoration:none; }
+  button, .btn { font:inherit; font-weight:600; border:1px solid var(--line); background:var(--bg); color:var(--ink); border-radius:9px; padding:8px 12px; cursor:pointer; text-decoration:none; display:inline-block; }
+  button.primary, .btn.primary { background:var(--blue); border-color:var(--blue); color:var(--blue-ink); }
+  button.full { width:100%; padding:10px; } button:disabled { opacity:.55; } button:focus-visible, input:focus-visible, select:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+  input, select { width:100%; font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:8px 10px; }
+  .mute { color:var(--mute); font-size:12px; } .err { color:var(--bad); font-size:13px; margin-top:8px; }
+  .job { border:1px solid var(--line); border-radius:11px; padding:10px 12px; margin-top:10px; }
+  .top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; } .t { font-weight:650; } 
+  .chip { font-size:12px; font-weight:600; padding:2px 8px; border-radius:99px; background:var(--soft); color:var(--mute); white-space:nowrap; }
+  .chip.ok { background:var(--ok-bg); color:var(--ok); } .chip.warn { background:var(--warn-bg); color:var(--warn); } .chip.bad { background:var(--bad-bg); color:var(--bad); } .chip.blue { background:var(--blue); color:var(--blue-ink); }
+  .row { display:flex; gap:8px; margin-top:8px; align-items:center; flex-wrap:wrap; } .row select { flex:1; min-width:120px; }
+  textarea { width:100%; min-height:110px; resize:vertical; margin-top:8px; font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:8px 10px; }
+  textarea:focus-visible { outline:2px solid var(--blue); outline-offset:2px; } a { color:var(--blue); }
+  .mini { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 10px; margin-top:6px; border:1px solid var(--line); border-radius:9px; cursor:pointer; }
+  .mini:hover { background:var(--soft); } .mini .mt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; }
+  .score { font-size:22px; font-weight:750; }
+</style></head>
+<body><div class="wrap" id="root"></div><script src="common.js"></script><script src="popup.js"></script></body></html>

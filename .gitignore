@@ -1,0 +1,23 @@
+# Personal data: never commit
+bank.yaml
+out/
+tracker.csv
+voice/
+template/contact.txt
+confidential*.txt
+
+# Secrets and runtime state
+app/token.txt
+app/jobs/
+app/scratch/
+app/usage.log
+app/server.log
+app/confidential.txt
+
+# Local tooling and old files
+.impeccable/
+app/legacy/
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store

@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Job Desk",
+  "version": "1.0.0",
+  "description": "Send a job posting to your local Job Desk, get notified when the fit check and tailored resume are ready.",
+  "permissions": ["activeTab", "scripting", "storage", "notifications", "contextMenus", "alarms"],
+  "host_permissions": ["http://127.0.0.1:8787/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "Job Desk", "default_icon": "icon128.png" },
+  "icons": { "128": "icon128.png" }
+}
